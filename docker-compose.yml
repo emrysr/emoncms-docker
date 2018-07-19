@@ -33,6 +33,13 @@ services:
     image: redis:3.0.7
     volumes:
       - emon-redis-data:/data
+  # mqtt:
+  #   # Official eclipse-mosquitto image
+  #   image: eclipse-mosquitto
+  #   volumes:
+  #     - emon-mqtt-config:/mosquitto/config
+  #     - emon-mqtt-data:/mosquitto/config
+  #     - emon-mqtt-log:/mosquitto/log
 
 volumes:
   emon-phpfiwa:
@@ -45,3 +52,5 @@ volumes:
     driver: local
   emon-redis-data:
     driver: local
+  # emon-mqtt-data:
+  #   driver: local
