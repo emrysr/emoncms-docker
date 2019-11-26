@@ -11,9 +11,8 @@ services:
     build: .
     volumes:
       # mount docker volumes persistant inside docker container
-      - emon-phpfiwa:/var/lib/phpfiwa
-      - emon-phpfina:/var/lib/phpfina
-      - emon-phptimeseries:/var/lib/phptimeseries
+      - emon-phpfina:/var/opt/emoncms/phpfina
+      - emon-phptimeseries:/var/opt/emoncms/phptimeseries
     links:
       # Link to MYSQL DB (see below)
       - db
@@ -23,14 +22,14 @@ services:
   db:
     # Official MYSQL docker image
     # To do: make compatiable with 5.7
-    image: mysql:5.6
+    image: mariadb:10
     environment:
       - "MYSQL_HOST=localhost"
     volumes:
       - emon-db-data:/var/lib/mysql
   redis:
     # Official redis image
-    image: redis:3.0.7
+    image: redis:5
     volumes:
       - emon-redis-data:/data
 
