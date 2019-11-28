@@ -1,6 +1,6 @@
 # Base docker compose, added to by docker-compose.override or docker-compose.prod. See Readme.md
 
-version: '2'
+version: '3'
 
 services:
 
@@ -8,39 +8,53 @@ services:
   web:
     # If pre-built image from docker hub exists then use that (docker pull openenergymonitor/emoncms:latest) if not Buildcontainer see Dockerflile
     image: openenergymonitor/emoncms:latest
+    restart: always
     build: .
     volumes:
       # mount docker volumes persistant inside docker container
       - emon-phpfina:/var/opt/emoncms/phpfina
       - emon-phptimeseries:/var/opt/emoncms/phptimeseries
+      - emon-cms:/var/www/emoncms
     links:
       # Link to MYSQL DB (see below)
       - db
       - redis
+    ports:
+      - "88:80"
+    env_file:
+      - "./default.docker-env"
+      - "./config/emoncms.env"
+
+    working_dir: /var/www/emoncms
 
   # MYSQL Database
   db:
     # Official MYSQL docker image
     # To do: make compatiable with 5.7
     image: mariadb:10
+    restart: always
     environment:
-      - "MYSQL_HOST=localhost"
+      MYSQL_ROOT_PASSWORD: example
+      MYSQL_HOST: localhost
+    ports:
+      - "3306"
     volumes:
       - emon-db-data:/var/lib/mysql
   redis:
-    # Official redis image
-    image: redis:5
+    build: ./redis
     volumes:
       - emon-redis-data:/data
+  mqtt:
+    restart: unless-stopped
+    build: ./mqtt
+  mqtt_writer:
+    restart: unless-stopped
+    build: ./mqtt
 
 volumes:
   emon-phpfiwa:
-    driver: local
   emon-phpfina:
-    driver: local
   emon-phptimeseries:
-    driver: local
   emon-db-data:
-    driver: local
   emon-redis-data:
-    driver: local
+  emon-cms:

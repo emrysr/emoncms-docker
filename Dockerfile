@@ -21,7 +21,7 @@ RUN a2enmod rewrite
 COPY config/php.ini /usr/local/etc/php/
 
 # Add custom Apache config
-COPY config/emoncms.conf /etc/apache2/sites-available/emoncms.conf
+COPY config/apache.conf /etc/apache2/sites-available/emoncms.conf
 RUN a2dissite 000-default.conf
 RUN a2ensite emoncms
 
@@ -30,11 +30,12 @@ RUN a2ensite emoncms
 # ADD ./emoncms /var/www/html
 
 # Clone in master Emoncms repo & modules - overwritten in development with local FS files
+# todo: clone in /opt/emoncms/* and link to in /var/www/emoncms/Modules/*
 RUN mkdir /var/www/emoncms
 RUN git clone https://github.com/emoncms/emoncms.git /var/www/emoncms
-RUN git clone https://github.com/emoncms/dashboard.git /var/www/emoncms/Modules/dashboard
-RUN git clone https://github.com/emoncms/graph.git /var/www/emoncms/Modules/graph
-RUN git clone https://github.com/emoncms/app.git /var/www/emoncms/Modules/app
+# RUN git clone https://github.com/emoncms/dashboard.git /var/www/emoncms/Modules/dashboard
+# RUN git clone https://github.com/emoncms/graph.git /var/www/emoncms/Modules/graph
+# RUN git clone https://github.com/emoncms/app.git /var/www/emoncms/Modules/app
 
 COPY docker.settings.ini /var/www/emoncms/settings.ini
 
@@ -49,6 +50,9 @@ RUN chown www-data:root /var/opt/emoncms/phptimeseries
 RUN mkdir /var/log/emoncms
 RUN touch /var/log/emoncms/emoncms.log
 RUN chmod 666 /var/log/emoncms/emoncms.log
+
+WORKDIR /var/www/emoncms
+CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
 
 # TODO
 # Add Pecl :
