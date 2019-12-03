@@ -1,11 +1,13 @@
 # Base docker compose, added to by docker-compose.override or docker-compose.prod. See Readme.md
 
-version: '3'
+version: '2.1'
 
 services:
-
   # PHP & apache container using offical Docker PHP iamge
   web:
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
     # If pre-built image from docker hub exists then use that (docker pull openenergymonitor/emoncms:latest) if not Buildcontainer see Dockerflile
     image: openenergymonitor/emoncms:latest
     restart: always
@@ -16,40 +18,56 @@ services:
       - emon-phptimeseries:/var/opt/emoncms/phptimeseries
       - emon-cms:/var/www/emoncms
     links:
-      # Link to MYSQL DB (see below)
       - db
       - redis
     ports:
-      - "88:80"
-    env_file:
-      - "./default.docker-env"
-      - "./config/emoncms.env"
-
+      - 8080:80
     working_dir: /var/www/emoncms
+    depends_on:
+        db:
+          condition: service_healthy
+    command: ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
 
   # MYSQL Database
   db:
-    # Official MYSQL docker image
-    # To do: make compatiable with 5.7
-    image: mariadb:10
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
+    image: mysql:latest
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: example
-      MYSQL_HOST: localhost
-    ports:
-      - "3306"
+    # wait for mysql server to be up
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
     volumes:
       - emon-db-data:/var/lib/mysql
+      - ./mysql:/etc/mysql/conf.d
+
   redis:
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
     build: ./redis
     volumes:
       - emon-redis-data:/data
+
   mqtt:
-    restart: unless-stopped
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
     build: ./mqtt
-  mqtt_writer:
-    restart: unless-stopped
-    build: ./mqtt
+
+  emoncms_mqtt:
+    container_name: 'emoncms-emoncms_mqtt'
+    image: openenergymonitor/emoncms:latest
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
+    
+    command: ["/usr/local/bin/php", "/var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php", "2>&1", ">", "/var/log/mqtt_input.log"]
+    volumes:
+      - emon-cms:/var/www/emoncms
 
 volumes:
   emon-phpfiwa:

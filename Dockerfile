@@ -52,7 +52,6 @@ RUN touch /var/log/emoncms/emoncms.log
 RUN chmod 666 /var/log/emoncms/emoncms.log
 
 WORKDIR /var/www/emoncms
-CMD ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
 
 # TODO
 # Add Pecl :
