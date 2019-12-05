@@ -20,9 +20,6 @@ services:
       - db
       - redis
     working_dir: /var/www/emoncms
-    depends_on:
-        db:
-            condition: service_healthy
     command: ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
 
   # MYSQL Database
