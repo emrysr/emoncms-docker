@@ -1,6 +1,6 @@
 # production / deployment / clean testing enviroment setup
 
-version: '2'
+version: '2.1'
 services:
 
   web:
@@ -20,6 +20,14 @@ services:
     
   db:
     restart: always
+    env_file:
+     - '.docker-env'
+
+  redis:
+    env_file:
+     - '.docker-env'
+
+  mqtt:
     env_file:
      - '.docker-env'
   

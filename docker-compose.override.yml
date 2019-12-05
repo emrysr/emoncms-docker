@@ -1,22 +1,25 @@
 # dev enviroment setup
 
-version: '2'
+version: '2.1'
 services:
 
   web:
     ports:
-      # Expose Emoncms on localhost port 8080
-      - 8080:80
-    #volumes:
-      ##mount emoncms files from local FS for dev
-      #- ./emoncms:/var/www/html
-    env_file:
-      # Use default enviroment variables file for dev
-      - 'default.docker-env'
-
-  db:
-    env_file:
-      - 'default.docker-env'
-  redis:
-    env_file:
-      - 'default.docker-env'
+      # Expose Emoncms on localhost port 88
+      - 88:80
+    volumes:
+      #mount emoncms files from local FS for dev
+      - .:/var/www/emoncms
+    environment:
+      - LOG_LEVEL=2
+    command: bash -c "/var/www/emoncms/scripts/log-to-stout.sh && /usr/sbin/apachectl -D FOREGROUND"
+  
+  emoncms_mqtt:
+    volumes:
+      - .:/var/www/emoncms
+  emoncms_feedwriter:
+    volumes:
+      - .:/var/www/emoncms
+  emoncms_service-runner:
+    volumes:
+      - .:/var/www/emoncms

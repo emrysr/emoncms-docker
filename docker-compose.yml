@@ -10,7 +10,6 @@ services:
       - ./config/emoncms.env
     # If pre-built image from docker hub exists then use that (docker pull openenergymonitor/emoncms:latest) if not Buildcontainer see Dockerflile
     image: openenergymonitor/emoncms:latest
-    restart: always
     build: .
     volumes:
       # mount docker volumes persistant inside docker container
@@ -20,12 +19,10 @@ services:
     links:
       - db
       - redis
-    ports:
-      - 8080:80
     working_dir: /var/www/emoncms
     depends_on:
         db:
-          condition: service_healthy
+            condition: service_healthy
     command: ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
 
   # MYSQL Database
@@ -33,8 +30,7 @@ services:
     env_file:
       - ./default.docker-env
       - ./config/emoncms.env
-    image: mysql:latest
-    restart: always
+    image: mariadb:latest
     # wait for mysql server to be up
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
@@ -59,16 +55,41 @@ services:
     build: ./mqtt
 
   emoncms_mqtt:
-    container_name: 'emoncms-emoncms_mqtt'
     image: openenergymonitor/emoncms:latest
     env_file:
       - ./default.docker-env
       - ./config/emoncms.env
-    
+    links:
+      - db
+      - redis
     command: ["/usr/local/bin/php", "/var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php", "2>&1", ">", "/var/log/mqtt_input.log"]
     volumes:
       - emon-cms:/var/www/emoncms
 
+  emoncms_feedwriter:
+    image: openenergymonitor/emoncms:latest
+    env_file:
+        - ./default.docker-env
+        - ./config/emoncms.env
+    links:
+        - db
+        - redis
+    command: ["/usr/local/bin/php", "/var/www/emoncms/scripts/feedwriter.php"]
+    volumes:
+        - emon-cms:/var/www/emoncms
+
+  emoncms_service-runner:
+    image: openenergymonitor/emoncms:latest
+    env_file:
+        - ./default.docker-env
+        - ./config/emoncms.env
+    links:
+        - db
+        - redis
+    command: ["/usr/bin/python", "/var/www/emoncms/scripts/services/service-runner/service-runner.py"]
+    volumes:
+        - emon-cms:/var/www/emoncms
+         
 volumes:
   emon-phpfiwa:
   emon-phpfina:

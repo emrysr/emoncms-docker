@@ -6,10 +6,13 @@ RUN apt-get update && apt-get install -y \
               libcurl4-gnutls-dev \
               libmcrypt-dev \
               libmosquitto-dev \
-              git-core
+              git-core \
+              python \
+              python-pip
 
 # Enable PHP modules
 RUN docker-php-ext-install -j$(nproc) mysqli curl json mcrypt gettext
+RUN pip install redis
 RUN pecl install redis-3.1.6 \
   \ && docker-php-ext-enable redis
 RUN pecl install Mosquitto-0.4.0 \

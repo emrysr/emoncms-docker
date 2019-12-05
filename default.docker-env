@@ -13,7 +13,7 @@ REDIS_ENABLED=true
 REDIS_HOST=redis
 REDIS_PORT=6379
 # At the moment Docker doesn't honour the REDIS_AUTH variable, so it will always be passwordless
-# REDIS_AUTH=
+REDIS_AUTH=
 REDIS_PREFIX='emoncms'
 
 # MQTT
@@ -26,3 +26,9 @@ MQTT_BASETOPIC=emon
 # Feed
 PHPFINA_DIR=/var/opt/emoncms/phpfina/
 PHPTIMESERIES_DIR=/var/opt/emoncms/phptimeseries/
+
+# Log
+LOG_TO_STOUT=true
+LOG_ENABLED=true
+LOG_LEVEL=3
+LOG_LOCATION=/var/log/emoncms.log
