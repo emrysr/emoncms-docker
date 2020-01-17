@@ -1,23 +1,36 @@
 # Offical Docker PHP & Apache image https://hub.docker.com/_/php/
-FROM php:7.0-apache
-
-# Install deps
+# FROM balenalib/raspberrypi3-ubuntu-python:latest
+FROM php:7.2-apache
 RUN apt-get update && apt-get install -y \
-              libcurl4-gnutls-dev \
-              libmcrypt-dev \
-              libmosquitto-dev \
-              git-core \
-              python \
-              python-pip
+                libcurl4-gnutls-dev \
+                libmcrypt-dev \
+                libmosquitto-dev \
+                git \
+                apache2 \
+                python \
+                python-pip
 
 # Enable PHP modules
-RUN docker-php-ext-install -j$(nproc) mysqli curl json mcrypt gettext
+# RUN docker-php-ext-install -j$(nproc) mysqli curl json mcrypt gettext
 RUN pip install redis
 RUN pecl install redis-3.1.6 \
-  \ && docker-php-ext-enable redis
-RUN pecl install Mosquitto-0.4.0 \
-  \ && docker-php-ext-enable mosquitto
+#   \ && phpenmod redis
+    && docker-php-ext-enable redis
 
+RUN pecl install Mosquitto-0.4.0 
+# phpenmod mosquitto && \
+# docker-php-ext-enable mosquitto
+
+RUN docker-php-ext-install mysqli 
+    # docker-php-ext-enable mysqli
+    
+RUN docker-php-ext-install gettext 
+    # docker-php-ext-enable gettext
+
+RUN pecl install mcrypt-1.0.2 \
+    && docker-php-ext-enable mcrypt
+
+# Enable apache modules
 RUN a2enmod rewrite
 
 # Add custom PHP config
@@ -57,6 +70,7 @@ RUN chmod 666 /var/log/emoncms/emoncms.log
 WORKDIR /var/www/emoncms
 
 # TODO
+# restart apache?
 # Add Pecl :
 # - dio
 # - Swiftmailer
