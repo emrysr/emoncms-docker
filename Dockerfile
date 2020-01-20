@@ -17,9 +17,9 @@ RUN pecl install redis-3.1.6 \
 #   \ && phpenmod redis
     && docker-php-ext-enable redis
 
-RUN pecl install Mosquitto-0.4.0 
-# phpenmod mosquitto && \
-# docker-php-ext-enable mosquitto
+RUN pecl install Mosquitto-0.4.0 \
+phpenmod mosquitto && \
+docker-php-ext-enable mosquitto
 
 RUN docker-php-ext-install mysqli 
     # docker-php-ext-enable mysqli

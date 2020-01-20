@@ -3,7 +3,7 @@
 version: '2.1'
 
 services:
-#   PHP & apache container using offical Docker PHP iamge
+  # PHP & apache container using offical Docker PHP iamge
   web:
     env_file:
       - ./default.docker-env
@@ -17,14 +17,14 @@ services:
       - emon-phptimeseries:/var/opt/emoncms/phptimeseries
       - emon-cms:/var/www/emoncms
     links:
-    #   - db
+      - db
       - redis
     working_dir: /var/www/emoncms
     command: ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
     expose:
         - "80"
 
-#   MYSQL Database
+# #   MYSQL Database
   db:
     env_file:
       - ./default.docker-env
@@ -54,19 +54,21 @@ services:
       - ./config/emoncms.env
     build: ./mqtt
 
-#   emoncms_mqtt:
-#     image: openenergymonitor/emoncms:latest
-#     env_file:
-#       - ./default.docker-env
-#       - ./config/emoncms.env
-#     links:
-#       - db
-#       - redis
-#       - mqtt
-#     command: ["bash -c", $(which php), "/var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php", "2>&1", ">", "/var/log/mqtt_input.log"]
-#     volumes:
-#       - emon-cms:/var/www/emoncms
-
+  emoncms_mqtt:
+    image: emoncms
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
+    links:
+      - db
+      - redis
+      - mqtt
+    # command: [/bin/bash, /usr/local/bin/php, var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php, 2>&1 > /var/log/mqtt_input.log]
+    # command: /usr/local/bin/php /var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php 2>&1 > /var/log/mqtt_input.log 
+    command: ["/bin/bash", "-c","trap : TERM INT; sleep infinity & wait"]
+    volumes:
+      - emon-cms:/var/www/emoncms
+      
 #   emoncms_feedwriter:
 #     image: openenergymonitor/emoncms:latest
 #     env_file:
@@ -75,7 +77,7 @@ services:
 #     links:
 #         - db
 #         - redis
-#     command: ["bash -c", $(which php), "/var/www/emoncms/scripts/feedwriter.php"]
+#     command: ["bash -c", "`which php`", "/var/www/emoncms/scripts/feedwriter.php"]
 #     volumes:
 #         - emon-cms:/var/www/emoncms
 
@@ -87,7 +89,7 @@ services:
 #     links:
 #         - db
 #         - redis
-#     command: ["$(which python)", "/var/www/emoncms/scripts/services/service-runner/service-runner.py"]
+#     command: ["`which python`", "/var/www/emoncms/scripts/services/service-runner/service-runner.py"]
 #     volumes:
 #         - emon-cms:/var/www/emoncms
          
@@ -95,6 +97,6 @@ volumes:
   emon-phpfiwa:
   emon-phpfina:
   emon-phptimeseries:
-  emon-db-data:
   emon-redis-data:
+  emon-db-data:
   emon-cms:
