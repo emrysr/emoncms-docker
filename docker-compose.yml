@@ -47,6 +47,10 @@ services:
     build: ./redis
     volumes:
       - emon-redis-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
 
   mqtt:
     env_file:
