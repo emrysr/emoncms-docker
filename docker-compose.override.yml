@@ -11,16 +11,23 @@ services:
       #mount emoncms files from local FS for dev
       - /home/emrys/Documents/emoncms2:/var/www/emoncms
     environment:
-      - LOG_LEVEL=2
-      - MQTT_ENABLED=true
+      - LOG_LEVEL=1
+      - MQTT_ENABLED = true
+      - MQTT_HOST = mqtt
+
     command: bash -c "/var/www/emoncms/scripts/log-to-stout.sh && /usr/sbin/apachectl -D FOREGROUND"
-  
+    
+  emoncms_service-runner:
+    volumes:
+      - ../emoncms2:/var/www/emoncms
+
   emoncms_mqtt:
     volumes:
       - ../emoncms2:/var/www/emoncms
     environment:
-      - MQTT_ENABLED=true
-#   emoncms_feedwriter:
+        - LOG_LEVEL=1
+        - MQTT_HOST=mqtt
+        #   emoncms_feedwriter:
 #     volumes:
 #       - .:/var/www/emoncms
 #   emoncms_service-runner:

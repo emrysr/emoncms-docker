@@ -16,11 +16,7 @@ RUN pecl install redis \
   \ && docker-php-ext-enable redis
 RUN pecl install Mosquitto-beta \
   \ && docker-php-ext-enable mosquitto
-RUN docker-php-ext-install mysqli 
-    # docker-php-ext-enable mysqli
     
-RUN docker-php-ext-install gettext 
-    # docker-php-ext-enable gettext
 RUN pecl install mcrypt-1.0.2 \
     && docker-php-ext-enable mcrypt
 
@@ -43,6 +39,7 @@ RUN a2ensite emoncms
 # todo: clone in /opt/emoncms/* and link to in /var/www/emoncms/Modules/*
 RUN mkdir /var/www/emoncms
 RUN git clone https://github.com/emoncms/emoncms.git /var/www/emoncms
+RUN git clone https://github.com/emoncms/device.git /var/www/emoncms/Modules/device
 # RUN git clone https://github.com/emoncms/dashboard.git /var/www/emoncms/Modules/dashboard
 # RUN git clone https://github.com/emoncms/graph.git /var/www/emoncms/Modules/graph
 # RUN git clone https://github.com/emoncms/app.git /var/www/emoncms/Modules/app
@@ -60,6 +57,8 @@ RUN chown www-data:root /var/opt/emoncms/phptimeseries
 RUN mkdir /var/log/emoncms
 RUN touch /var/log/emoncms/emoncms.log
 RUN chmod 666 /var/log/emoncms/emoncms.log
+
+# RUN ln -sf /dev/stderr /var/log/emoncms/emoncms.log
 
 WORKDIR /var/www/emoncms
 

@@ -9,18 +9,19 @@ services:
       - ./default.docker-env
       - ./config/emoncms.env
     # If pre-built image from docker hub exists then use that (docker pull openenergymonitor/emoncms:latest) if not Buildcontainer see Dockerflile
-    image: openenergymonitor/emoncms:latest
+    image: openenergymonitor/emoncms:10.1.13
     build: .
     volumes:
       # mount docker volumes persistant inside docker container
-      - emon-phpfina:/var/opt/emoncms/phpfina
-      - emon-phptimeseries:/var/opt/emoncms/phptimeseries
+      - emon-phpfina:/var/opt/emoncms/phpfina/
+      - emon-phptimeseries:/var/opt/emoncms/phptimeseries/
       - emon-cms:/var/www/emoncms
+      - emon-log:/var/log/emoncms
     links:
       - db
       - redis
     working_dir: /var/www/emoncms
-    command: ["/usr/sbin/apachectl", "-D", "FOREGROUND"]
+    command: ["apache2-foreground"]
     expose:
         - "80"
 
@@ -59,7 +60,8 @@ services:
     build: ./mqtt
 
   emoncms_mqtt:
-    image: emoncms
+    image: openenergymonitor/emoncms:10.1.13
+    build: .
     env_file:
       - ./default.docker-env
       - ./config/emoncms.env
@@ -67,40 +69,43 @@ services:
       - db
       - redis
       - mqtt
-    # command: [/bin/bash, /usr/local/bin/php, var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php, 2>&1 > /var/log/mqtt_input.log]
-    # command: /usr/local/bin/php /var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php 2>&1 > /var/log/mqtt_input.log 
-    command: ["/bin/bash", "-c","trap : TERM INT; sleep infinity & wait"]
+    command: php /var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php
     volumes:
       - emon-cms:/var/www/emoncms
+      - emon-log:/var/log/emoncms
       
-#   emoncms_feedwriter:
-#     image: openenergymonitor/emoncms:latest
-#     env_file:
-#         - ./default.docker-env
-#         - ./config/emoncms.env
-#     links:
-#         - db
-#         - redis
-#     command: ["bash -c", "`which php`", "/var/www/emoncms/scripts/feedwriter.php"]
-#     volumes:
-#         - emon-cms:/var/www/emoncms
+  emoncms_feedwriter:
+    image: openenergymonitor/emoncms:10.1.13
+    build: .
+    env_file:
+        - ./default.docker-env
+        - ./config/emoncms.env
+    links:
+        - db
+        - redis
+        - mqtt
+    command: php /var/www/emoncms/scripts/feedwriter.php
+    volumes:
+        - emon-cms:/var/www/emoncms
+        - emon-log:/var/log/emoncms
 
-#   emoncms_service-runner:
-#     image: openenergymonitor/emoncms:latest
-#     env_file:
-#         - ./default.docker-env
-#         - ./config/emoncms.env
-#     links:
-#         - db
-#         - redis
-#     command: ["`which python`", "/var/www/emoncms/scripts/services/service-runner/service-runner.py"]
-#     volumes:
-#         - emon-cms:/var/www/emoncms
-         
+  emoncms_service-runner:
+    build: ./service-runner
+    env_file:
+        - ./default.docker-env
+        - ./config/emoncms.env
+    links:
+        - redis
+    command: [python, /var/www/emoncms/scripts/services/service-runner/service-runner.py]
+    volumes:
+        - emon-cms:/var/www/emoncms
+        - emon-log:/var/log/emoncms
+
 volumes:
   emon-phpfiwa:
   emon-phpfina:
   emon-phptimeseries:
   emon-redis-data:
   emon-db-data:
+  emon-log:
   emon-cms:
