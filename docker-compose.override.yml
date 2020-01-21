@@ -27,9 +27,7 @@ services:
     environment:
         - LOG_LEVEL=1
         - MQTT_HOST=mqtt
-        #   emoncms_feedwriter:
-#     volumes:
-#       - .:/var/www/emoncms
-#   emoncms_service-runner:
-#     volumes:
-#       - .:/var/www/emoncms
+        
+  emoncms_feedwriter:
+    volumes:
+      - ../emoncms2:/var/www/emoncms
