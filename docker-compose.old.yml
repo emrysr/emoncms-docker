@@ -1,0 +1,111 @@
+# Base docker compose, added to by docker-compose.override or docker-compose.prod. See Readme.md
+
+version: '2.1'
+
+services:
+  # PHP & apache container using offical Docker PHP iamge
+  web:
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
+    # If pre-built image from docker hub exists then use that (docker pull openenergymonitor/emoncms:latest) if not Buildcontainer see Dockerflile
+    image: openenergymonitor/emoncms:10.1.13
+    build: .
+    volumes:
+      # mount docker volumes persistant inside docker container
+      - emon-phpfina:/var/opt/emoncms/phpfina/
+      - emon-phptimeseries:/var/opt/emoncms/phptimeseries/
+      - emon-cms:/var/www/emoncms
+      - emon-log:/var/log/emoncms
+    links:
+      - db
+      - redis
+    working_dir: /var/www/emoncms
+    command: ["apache2-foreground"]
+    expose:
+        - "80"
+
+# #   MYSQL Database
+  db:
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
+    build: ./mysql
+    # wait for mysql server to be up
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    volumes:
+      - emon-db-data:/var/lib/mysql
+    # mysql specific (not mariadb) settings
+    #   - ./mysql:/etc/mysql/conf.d
+
+  redis:
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
+    build: ./redis
+    volumes:
+      - emon-redis-data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+
+  mqtt:
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
+    build: ./mqtt
+
+  emoncms_mqtt:
+    image: openenergymonitor/emoncms:10.1.13
+    build: .
+    env_file:
+      - ./default.docker-env
+      - ./config/emoncms.env
+    links:
+      - db
+      - redis
+      - mqtt
+    command: php /var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php
+    volumes:
+      - emon-cms:/var/www/emoncms
+      - emon-log:/var/log/emoncms
+      
+  emoncms_feedwriter:
+    image: openenergymonitor/emoncms:10.1.13
+    build: .
+    env_file:
+        - ./default.docker-env
+        - ./config/emoncms.env
+    links:
+        - db
+        - redis
+        - mqtt
+    command: php /var/www/emoncms/scripts/feedwriter.php
+    volumes:
+        - emon-cms:/var/www/emoncms
+        - emon-log:/var/log/emoncms
+
+  emoncms_service-runner:
+    build: ./service-runner
+    env_file:
+        - ./default.docker-env
+        - ./config/emoncms.env
+    links:
+        - redis
+    command: [python, /var/www/emoncms/scripts/services/service-runner/service-runner.py]
+    volumes:
+        - emon-cms:/var/www/emoncms
+        - emon-log:/var/log/emoncms
+
+volumes:
+  emon-phpfiwa:
+  emon-phpfina:
+  emon-phptimeseries:
+  emon-redis-data:
+  emon-db-data:
+  emon-log:
+  emon-cms:

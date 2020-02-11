@@ -1,0 +1,2 @@
+FROM balenalib/%%BALENA_MACHINE_NAME%%-debian-python:2.7-buster-run
+RUN apt-get update

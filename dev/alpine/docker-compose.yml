@@ -1,0 +1,43 @@
+version: "2.1"
+services:
+    apache:
+            image: httpd:alpine
+            env_file:
+                    - ../../default.docker-env
+                    - ../../config/emoncms.env
+            volumes:
+                    - ./apache:/usr/local/apache2/conf/emoncms
+                    - ~/Documents/emoncms2:/usr/local/apache2/htdocs
+            links:
+                    - fpm
+            ports:
+                    - 88:80
+
+            command: ["httpd","-D","FOREGROUND","-f","/usr/local/apache2/conf/emoncms/emoncms.conf"]
+
+
+    fpm:
+            build: ./php
+            env_file:
+                    - ../../default.docker-env
+                    - ../../config/emoncms.env
+            volumes:
+                    - ~/Documents/emoncms2:/usr/local/apache2/htdocs
+            environment:
+                    - TIMEZONE=Europe/London
+                    - LOG_LEVEL=1
+                    - MQTT_ENABLED=true
+                    - MQTT_HOST=mqtt
+                    - REDIS_ENABLED=false
+
+    db:
+            image: mariadb/server 
+            env_file:
+                    - ../../default.docker-env
+                    - ../../config/emoncms.env
+            volumes:
+                    - emon-db-data:/var/lib/mysql
+        
+ 
+volumes: 
+    emon-db-data:

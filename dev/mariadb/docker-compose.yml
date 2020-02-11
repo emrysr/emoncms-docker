@@ -1,0 +1,7 @@
+db:
+    image: mariadb:10.4
+    environment:
+	- MYSQL_ALLOW_EMPTY_PASSWORD=true
+	- MYSQL_DATABASE=emoncms
+	- MYSQL_PASSWORD=YOUR_SECURE_PASSWORD
+	- MYSQL_USER=emoncms
