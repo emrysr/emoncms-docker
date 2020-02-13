@@ -1,2 +1,0 @@
-FROM balenalib/%%BALENA_MACHINE_NAME%%
-ENTRYPOINT ["tail", "-f", "/dev/null"]
