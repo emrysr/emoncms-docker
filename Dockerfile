@@ -1,4 +1,4 @@
-FROM balenalib/%%BALENA_MACHINE_NAME%%-debian:buster-build
+FROM balenalib/debian:buster-build
 COPY qemu-arm-static /usr/bin
 
 # APACHE, MYSQL, GETTEXT, GIT

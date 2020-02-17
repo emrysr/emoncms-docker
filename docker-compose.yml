@@ -23,7 +23,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_AUTH=
-      - REDIS_PREFIX='emoncms'
+      - REDIS_PREFIX=emoncms
       - MQTT_ENABLED=true
       - MQTT_HOST=localhost
       - MQTT_USER=YOUR_MQTT_USER
@@ -50,7 +50,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_AUTH=
-      - REDIS_PREFIX='emoncms'
+      - REDIS_PREFIX=emoncms
       - MQTT_ENABLED=true
       - MQTT_HOST=localhost
       - MQTT_USER=YOUR_MQTT_USER
@@ -82,15 +82,16 @@ services:
   # emoncms:
   #     image: balenalib/raspberrypi3-debian-stretch
   #
-  # emoncms_mqtt:
-  #     build: php-cli
-  #     links:
-  #         - db
-  #         - redis
-  #         - mqtt
-  #     volumes:
-  #         - emon-cms:/var/www
-  #     command: php /var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php
+  emoncms_mqtt:
+    build: php-cli
+    links:
+      - db
+      - redis
+      - mqtt
+    volumes:
+      - emon-cms:/var/www
+    command:
+      ['php', '/var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php']
   # emoncms_mqtt:
   #     image: openenergymonitor/emoncms:10.1.13
   #     build: .

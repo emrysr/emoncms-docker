@@ -1,16 +1,129 @@
-version: "2.1"
+version: '2.1'
 services:
-    web:
-        ports:
-            - 88:80
-    db:
-        ports:
-            - 3307:3306
-        environment:
-            - MYSQL_ALLOW_EMPTY_PASSWORD=true
-            - MYSQL_DATABASE=emoncms
-            - MYSQL_PASSWORD=YOUR_SECURE_PASSWORD
-            - MYSQL_USER=emoncms
-    redis:
-        ports:
-            - 6378:6379
+  web:
+    build: ./web
+    links:
+      - php
+      - db
+      - redis
+      - mqtt
+    volumes:
+      - emon-data:/var/opt/emoncms
+      - emon-log:/var/log/emoncms
+      - emon-cms:/var/www/emoncms
+    ports:
+      - 88:80
+    environment:
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=emoncms
+      - MYSQL_USER=emoncms
+      - MYSQL_HOST=db
+      - MYSQL_PASSWORD=YOUR_SECURE_PASSWORD
+      - REDIS_ENABLED=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_AUTH=
+      - REDIS_PREFIX=emoncms
+      - MQTT_ENABLED=true
+      - MQTT_HOST=localhost
+      - MQTT_USER=YOUR_MQTT_USER
+      - MQTT_PASSWORD=YOUR_MQTT_PASSWORD
+      - MQTT_BASETOPIC=emon
+      - PHPFINA_DIR=/var/opt/emoncms/phpfina/
+      - PHPTIMESERIES_DIR=/var/opt/emoncms/phptimeseries/
+      - REDISBUFFER_ENABLED=false
+      - LOG_TO_STOUT=true
+      - LOG_ENABLED=true
+      - LOG_LEVEL=3
+      - LOG_LOCATION=/var/log/emoncms.log
+  php:
+    build: ./php-fpm
+    volumes:
+      - emon-cms:/var/www/emoncms
+    environment:
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=emoncms
+      - MYSQL_USER=emoncms
+      - MYSQL_PASSWORD=YOUR_SECURE_PASSWORD
+      - MYSQL_HOST=db
+      - REDIS_ENABLED=true
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_AUTH=
+      - REDIS_PREFIX=emoncms
+      - MQTT_ENABLED=true
+      - MQTT_HOST=localhost
+      - MQTT_USER=YOUR_MQTT_USER
+      - MQTT_PASSWORD=YOUR_MQTT_PASSWORD
+      - MQTT_BASETOPIC=emon
+      - PHPFINA_DIR=/var/opt/emoncms/phpfina/
+      - PHPTIMESERIES_DIR=/var/opt/emoncms/phptimeseries/
+      - REDISBUFFER_ENABLED=false
+      - LOG_TO_STOUT=true
+      - LOG_ENABLED=true
+      - LOG_LEVEL=3
+      - LOG_LOCATION=/var/log/emoncms.log
+  db:
+    image: mariadb:10.4
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+      - MYSQL_DATABASE=emoncms
+      - MYSQL_PASSWORD=YOUR_SECURE_PASSWORD
+      - MYSQL_USER=emoncms
+    volumes:
+      - emon-data:/var/lib/mysql
+
+  redis:
+    image: redis:5.0-alpine
+
+  mqtt:
+    image: eclipse-mosquitto:1.6
+
+  # emoncms:
+  #     image: balenalib/raspberrypi3-debian-stretch
+  #
+  emoncms_mqtt:
+    build: php-cli
+    links:
+      - db
+      - redis
+      - mqtt
+    volumes:
+      - emon-cms:/var/www
+    command:
+      ['php', '/var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php']
+  # emoncms_mqtt:
+  #     image: openenergymonitor/emoncms:10.1.13
+  #     build: .
+  #     links:
+  #         - db
+  #         - redis
+  #         - mqtt
+  #     command: php /var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php
+  #     volumes:
+  #         - emon-cms:/var/www/emoncms
+  #         - emon-log:/var/log/emoncms
+  # emoncms_feedwriter:
+  #     image: openenergymonitor/emoncms:10.1.13
+  #     build: .
+  #     links:
+  #         - db
+  #         - redis
+  #         - mqtt
+  #     command: php /var/www/emoncms/scripts/feedwriter.php
+  #     volumes:
+  #         - emon-cms:/var/www/emoncms
+  #         - emon-log:/var/log/emoncms
+  # emoncms_service-runner:
+  #     build: ./service-runner
+  #     links:
+  #         - redis
+  #     command: [python, /var/www/emoncms/scripts/services/service-runner/service-runner.py]
+  #     volumes:
+  #         - emon-cms:/var/www/emoncms
+  #         - emon-log:/var/log/emoncms
+
+volumes:
+  emon-data:
+  emon-log:
+  emon-cms:

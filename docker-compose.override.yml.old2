@@ -1,0 +1,33 @@
+# dev enviroment setup
+
+version: '2.1'
+services:
+
+  web:
+    ports:
+      # Expose Emoncms on localhost port 88
+      - 88:80
+    volumes:
+      #mount emoncms files from local FS for dev
+      - /home/emrys/Documents/emoncms2:/var/www/emoncms
+    environment:
+      - LOG_LEVEL=1
+      - MQTT_ENABLED=true
+      - MQTT_HOST=mqtt
+
+    command: bash -c "/var/www/emoncms/scripts/log-to-stout.sh && /usr/sbin/apachectl -D FOREGROUND"
+    
+  emoncms_service-runner:
+    volumes:
+      - ../emoncms2:/var/www/emoncms
+
+  emoncms_mqtt:
+    volumes:
+      - ../emoncms2:/var/www/emoncms
+    environment:
+        - LOG_LEVEL=1
+        - MQTT_HOST=mqtt
+        
+  emoncms_feedwriter:
+    volumes:
+      - ../emoncms2:/var/www/emoncms
