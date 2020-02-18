@@ -82,46 +82,46 @@ services:
   # emoncms:
   #     image: balenalib/raspberrypi3-debian-stretch
   #
-  emoncms_mqtt:
-    build: php-cli
-    links:
-      - db
-      - redis
-      - mqtt
-    volumes:
-      - emon-cms:/var/www
-    command:
-      ['php', '/var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php']
-  # emoncms_mqtt:
-  #     image: openenergymonitor/emoncms:10.1.13
-  #     build: .
-  #     links:
-  #         - db
-  #         - redis
-  #         - mqtt
-  #     command: php /var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php
-  #     volumes:
-  #         - emon-cms:/var/www/emoncms
-  #         - emon-log:/var/log/emoncms
-  # emoncms_feedwriter:
-  #     image: openenergymonitor/emoncms:10.1.13
-  #     build: .
-  #     links:
-  #         - db
-  #         - redis
-  #         - mqtt
-  #     command: php /var/www/emoncms/scripts/feedwriter.php
-  #     volumes:
-  #         - emon-cms:/var/www/emoncms
-  #         - emon-log:/var/log/emoncms
-  # emoncms_service-runner:
-  #     build: ./service-runner
-  #     links:
-  #         - redis
-  #     command: [python, /var/www/emoncms/scripts/services/service-runner/service-runner.py]
-  #     volumes:
-  #         - emon-cms:/var/www/emoncms
-  #         - emon-log:/var/log/emoncms
+#   emoncms_mqtt:
+#     build: php-cli
+#     links:
+#       - db
+#       - redis
+#       - mqtt
+#     volumes:
+#       - emon-cms:/var/www
+#     command:
+#       ['php', '/var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php']
+# emoncms_mqtt:
+#     image: openenergymonitor/emoncms:10.1.13
+#     build: .
+#     links:
+#         - db
+#         - redis
+#         - mqtt
+#     command: php /var/www/emoncms/scripts/services/emoncms_mqtt/emoncms_mqtt.php
+#     volumes:
+#         - emon-cms:/var/www/emoncms
+#         - emon-log:/var/log/emoncms
+# emoncms_feedwriter:
+#     image: openenergymonitor/emoncms:10.1.13
+#     build: .
+#     links:
+#         - db
+#         - redis
+#         - mqtt
+#     command: php /var/www/emoncms/scripts/feedwriter.php
+#     volumes:
+#         - emon-cms:/var/www/emoncms
+#         - emon-log:/var/log/emoncms
+# emoncms_service-runner:
+#     build: ./service-runner
+#     links:
+#         - redis
+#     command: [python, /var/www/emoncms/scripts/services/service-runner/service-runner.py]
+#     volumes:
+#         - emon-cms:/var/www/emoncms
+#         - emon-log:/var/log/emoncms
 
 volumes:
   emon-data:
